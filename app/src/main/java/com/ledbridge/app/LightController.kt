@@ -7,8 +7,7 @@ import kotlin.math.roundToInt
 /**
  * Light state (power, color, brightness) and its translation into strip commands.
  *
- * Brightness is applied in software by scaling the RGB color, so it behaves the same on
- * every controller variant and does not depend on a dedicated brightness command.
+ * Brightness is sent as a native Bluetooth command on ELK-BLEDOB03.
  */
 class LightController(private val ble: BleLed) {
     private var on = false
@@ -29,6 +28,7 @@ class LightController(private val ble: BleLed) {
             ble.send(BleLed.ON)
             on = true
             sendColor()
+            sendBrightness()
         } else {
             ble.send(BleLed.OFF)
             on = false
@@ -39,7 +39,7 @@ class LightController(private val ble: BleLed) {
     fun setBrightness(percent: Int) {
         brightness = percent.coerceIn(1, 100)
         ensureOn()
-        sendColor()
+        sendBrightness()
     }
 
     @Synchronized
@@ -78,7 +78,10 @@ class LightController(private val ble: BleLed) {
     }
 
     private fun sendColor() {
-        val k = brightness / 100.0
-        ble.send(BleLed.color((r * k).roundToInt(), (g * k).roundToInt(), (b * k).roundToInt()))
+        ble.send(BleLed.color(r, g, b))
+    }
+
+    private fun sendBrightness() {
+        ble.send(BleLed.brightness(brightness))
     }
 }
