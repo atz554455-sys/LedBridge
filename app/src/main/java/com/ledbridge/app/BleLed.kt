@@ -51,6 +51,10 @@ class BleLed(
 
         fun color(r: Int, g: Int, b: Int): ByteArray =
             frame(0x7E, 0x07, 0x05, 0x03, r.coerceIn(0, 255), g.coerceIn(0, 255), b.coerceIn(0, 255), 0x10, 0xEF)
+
+        // Native brightness validated on ELK-BLEDOB03 at 50% and 100%.
+        fun brightness(percent: Int): ByteArray =
+            frame(0x7E, 0x04, 0x01, percent.coerceIn(1, 100), 0x01, 0xFF, 0x02, 0x01, 0xEF)
     }
 
     private val ctx: Context = context.applicationContext
